@@ -35,10 +35,10 @@ function ext($url)
     $path_parts["extension"] = "txt";
     echo "$url\n";
     // Parse the URL
-    $path_parts = pathinfo(parse_url($url, PHP_URL_PATH));
+    $path_parts = pathinfo(parse_url($url, PHP_URL_PATH),PATHINFO_EXTENSION);
 
     // Get the extension
-    $extension = $path_parts["extension"];
+    $extension = $path_parts;
 
     // Output the extension
     return "$extension";
@@ -146,5 +146,12 @@ echo "\n$link\n";
 }
 
 // Start downloading from a given URL
-$startUrl="https://example.com/";
+/*
+//$startUrl ="https://www.hotzxgirl.com/ona-artist-nude-Free-Sex-Photos-and-Porn-Images-at-SEX-FUN/sex1.fun*wp-content*uploads*sites*20*2022*03*56-11.jpg.asp#nothing";
+$startUrl ="https://www.twpornstars.com/onaartist?sort=date&page=7";
+//$startUrl ="https://www.freeones.com/";
+//$startUrl ="https://www.porndig.com/leaked/feed/2216";*/
+//$startUrl ="https://zaramedya.net/ona+artist+porn"; //https://sdep.fr/ona+artist";
+$startUrl="https://www.twpornstars.com/onaartist?sort=date&page=7";
+$startUrl="https://xxxpornpics.net/who-doesnt-love-tits-and-yoga-pants-36f-JCZXpaDcnJ";//https://pholder.com/sexy-selfie?page=18";//https://sexynudes.tv/post/which-view-do-you-like-better-front-or-back-f-6ft-25082599";//https://www.hotzxgirl.com/ona-artist-nude-Free-Sex-Photos-and-Porn-Images-at-SEX-FUN/sex1.fun*wp-content*uploads*sites*20*2022*03*56-11.jpg.asp";
 downloadRecursive($startUrl);
