@@ -91,21 +91,26 @@ function downloadRecursive($url, $depth = 0)
     foreach ($links as $link) {
         // Construct absolute URL if necessary
         if (strpos($link, "http") !== 0) {
-            $link = rtrim($url, "/") . "/" . ltrim($link, "/");
+            $link = rtrim($url, "/") . "/" . ltrim(rtrim($link,'/'), "/");
+
         }
-        echo "\n$link\n";
+        
         // Get the filename from the URL
         $filename = "dls/" . basename($link);
         $filename = "dls/" . md5($link);
 
         $link = str_replace(["*", ".asp"], ["/", ""], $link);
+if (!isset( $_SESSION[$link] )) {
+echo "\n$link\n";
         // Download the file
         file_put_contents($filename, get($link));
 
         $f =
             "dls/" . ext2($filename) . "/" . md5($link) . "." . ext2($filename);
         @mkdir(dirname($f), 0777, true);
-        rename($filename, $f);
+        rename( $filename , $f);
+$_SESSION[$link]=$link;
+}
         // Recursively download links
         if (!isset($_SESSION[$link])) {
             downloadRecursive($link, $depth + 1);
@@ -121,7 +126,7 @@ function downloadRecursive($url, $depth = 0)
     foreach ($links as $link) {
         // Construct absolute URL if necessary
         if (strpos($link, "http") !== 0) {
-            $link = rtrim($url, "/") . "/" . ltrim($link, "/");
+            $link = rtrim($url, "/") . "/" . ltrim(rtrim($link,'/'), "/");
         }
 
         // Get the filename from the URL
@@ -131,13 +136,15 @@ echo "\n$link\n";
         file_put_contents($filename, get($link));
 
         $f = "dls/" . md5($link) . "." . ext2($filename);
-
+if(in_array(ext2($filename),array('jpg','jpeg','webp','gif','png'))){
         $f =
             "dls/" . ext2($filename) . "/" . md5($link) . "." . ext2($filename);
         @mkdir(dirname($f), 0777, true);
         rename($filename, $f);
         // Recursively download links
-
+}
+else
+{unlink($filename);}
         if (!isset($_SESSION[$link])) {
             downloadRecursive($link, $depth + 1);
             $_SESSION[$link] = $link;
@@ -146,12 +153,5 @@ echo "\n$link\n";
 }
 
 // Start downloading from a given URL
-/*
-//$startUrl ="https://www.hotzxgirl.com/ona-artist-nude-Free-Sex-Photos-and-Porn-Images-at-SEX-FUN/sex1.fun*wp-content*uploads*sites*20*2022*03*56-11.jpg.asp#nothing";
-$startUrl ="https://www.twpornstars.com/onaartist?sort=date&page=7";
-//$startUrl ="https://www.freeones.com/";
-//$startUrl ="https://www.porndig.com/leaked/feed/2216";*/
-//$startUrl ="https://zaramedya.net/ona+artist+porn"; //https://sdep.fr/ona+artist";
-$startUrl="https://www.twpornstars.com/onaartist?sort=date&page=7";
-$startUrl="https://xxxpornpics.net/who-doesnt-love-tits-and-yoga-pants-36f-JCZXpaDcnJ";//https://pholder.com/sexy-selfie?page=18";//https://sexynudes.tv/post/which-view-do-you-like-better-front-or-back-f-6ft-25082599";//https://www.hotzxgirl.com/ona-artist-nude-Free-Sex-Photos-and-Porn-Images-at-SEX-FUN/sex1.fun*wp-content*uploads*sites*20*2022*03*56-11.jpg.asp";
-downloadRecursive($startUrl);
+
+downloadRecursive($argv[1]);
