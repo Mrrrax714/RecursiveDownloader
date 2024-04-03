@@ -135,8 +135,5 @@ $_SESSION[$link]=$link;}
 
 // Start downloading from a given URL
 $startUrl =
-    "https://www.hotzxgirl.com/ona-artist-nude-Free-Sex-Photos-and-Porn-Images-at-SEX-FUN/sex1.fun*wp-content*uploads*sites*20*2022*03*56-11.jpg.asp#nothing";
-$startUrl ="https://www.twpornstars.com/onaartist?sort=date&page=7";
-//$startUrl ="https://www.freeones.com/";
-//$startUrl ="https://www.porndig.com/leaked/feed/2216";
+    "http://example.com";
 downloadRecursive($startUrl);
