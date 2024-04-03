@@ -1,6 +1,52 @@
 <?php
-require_once 'vendor/autoload.php';
+require_once "vendor/autoload.php";
 $faker = Faker\Factory::create();
+
+
+function enlargeURL($img){
+//de-Naked-Topless-295x295.jpg
+// $img = preg_replace('/\[x](\d+)[x](\d+)[_2x_]\.*/', '', $img);
+// $img = preg_replace('/[x]\d[x]\d[_2x_]\.*/', '', $img);
+// $img = preg_replace('/\/\[x]+\d+[x]+\d+\D+\d\.*/', '', $img);
+$img = preg_replace('/\-\d+x\d+\./', '.', $img);
+$img = preg_replace('/\_\d+./', '_1280.', $img);
+return $img;
+}
+
+
+function rel2abs($rel, $base)
+{
+    /* return if already absolute URL */
+    if (parse_url($rel, PHP_URL_SCHEME) != '') return $rel;
+
+    /* queries and anchors */
+    if ($rel[0]=='#' || $rel[0]=='?') return $base.$rel;
+
+    /* parse base URL and convert to local variables:
+       $scheme, $host, $path */
+    extract(parse_url($base));
+
+    /* remove non-directory element from path */
+    $path = preg_replace('#/[^/]*$#', '', $path);
+
+    /* destroy path if relative url points to root */
+    if ($rel[0] == '/') $path = '';
+
+    /* dirty absolute URL // with port number if exists */
+    if (parse_url($base, PHP_URL_PORT) != ''){
+        $abs = "$host:".parse_url($base, PHP_URL_PORT)."$path/$rel";
+    }else{
+        $abs = "$host$path/$rel";
+    }
+    /* replace '//' or '/./' or '/foo/../' with '/' */
+    $re = array('#(/\.?/)#', '#/(?!\.\.)[^/]+/\.\./#');
+    for($n=1; $n>0; $abs=preg_replace($re, '/', $abs, -1, $n)) {}
+
+    /* absolute URL is ready! */
+    return $scheme.'://'.$abs;
+}
+
+
 function ext2($f)
 {
     $mime = mime_content_type($f);
@@ -36,7 +82,7 @@ function ext($url)
     $path_parts["extension"] = "txt";
     echo "$url\n";
     // Parse the URL
-    $path_parts = pathinfo(parse_url($url, PHP_URL_PATH),PATHINFO_EXTENSION);
+    $path_parts = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
 
     // Get the extension
     $extension = $path_parts;
@@ -49,7 +95,7 @@ function ext($url)
 $url = "https://example.com";
 function get($url)
 {
-global $faker;
+    global $faker;
     // Initialize cURL session
     $ch = curl_init();
 
@@ -60,7 +106,7 @@ global $faker;
     // Set SSL related options
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // Verify the peer's SSL certificate
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // Check the existence of a common name and also verify that it matches the hostname provided
-curl_setopt($ch, CURLOPT_USERAGENT, $faker->userAgent());
+    curl_setopt($ch, CURLOPT_USERAGENT, $faker->userAgent());
     // Execute the cURL request
     $response = curl_exec($ch);
 
@@ -91,28 +137,33 @@ function downloadRecursive($url, $depth = 0)
 
     // Download each linked URL recursively
     foreach ($links as $link) {
+$link=rel2abs($link, $url);
         // Construct absolute URL if necessary
         if (strpos($link, "http") !== 0) {
-            $link = rtrim($url, "/") . "/" . ltrim(rtrim($link,'/'), "/");
-
+            $link = rtrim($url, "/") . "/" . ltrim(rtrim($link, "/"), "/");
         }
-        
+$link=enlargeURL($link);
         // Get the filename from the URL
         $filename = "dls/" . basename($link);
         $filename = "dls/" . md5($link);
 
         $link = str_replace(["*", ".asp"], ["/", ""], $link);
-if (!isset( $_SESSION[$link] )) {
-echo "\n$link\n";
-        // Download the file
-        file_put_contents($filename, get($link));
+        if (!isset($_SESSION[$link])) {
+            echo "\n$link\n";
+            // Download the file
+            file_put_contents($filename, get($link));
 
-        $f =
-            "dls/" . ext2($filename) . "/" . md5($link) . "." . ext2($filename);
-        @mkdir(dirname($f), 0777, true);
-        rename( $filename , $f);
-$_SESSION[$link]=$link;
-}
+            $f =
+                "dls/" .
+                ext2($filename) .
+                "/" .
+                md5($link) .
+                "." .
+                ext2($filename);
+            @mkdir(dirname($f), 0777, true);
+            rename($filename, $f);
+            $_SESSION[$link] = $link;
+        }
         // Recursively download links
         if (!isset($_SESSION[$link])) {
             downloadRecursive($link, $depth + 1);
@@ -126,32 +177,40 @@ $_SESSION[$link]=$link;
 
     // Download each linked URL recursively
     foreach ($links as $link) {
+$link=rel2abs($link, $url);
         // Construct absolute URL if necessary
         if (strpos($link, "http") !== 0) {
-            $link = rtrim($url, "/") . "/" . ltrim(rtrim($link,'/'), "/");
+            $link = rtrim($url, "/") . "/" . ltrim(rtrim($link, "/"), "/");
         }
+$link = str_replace(["*", ".asp"], ["/", ""], $link);
+$link=enlargeURL($link);
+        if (!isset($_SESSION[$link])) {
+            // Get the filename from the URL
+            $filename = "dls/" . md5($link) . "." . ext($link);
+            echo "\n$link\n";
+            // Download the file
+            file_put_contents($filename, get($link));
 
-
-if (!isset($_SESSION[$link])) {
-        // Get the filename from the URL
-        $filename = "dls/" . md5($link) . "." . ext($link);
-echo "\n$link\n";
-        // Download the file
-        file_put_contents($filename, get($link));
-
-        $f = "dls/" . md5($link) . "." . ext2($filename);
-if(in_array(ext2($filename),array('jpg','jpeg','webp','gif','png'))){
-        $f =
-            "dls/" . ext2($filename) . "/" . md5($link) . "." . ext2($filename);
-        @mkdir(dirname($f), 0777, true);
-        rename($filename, $f);
-        // Recursively download links
-}
-else
-{unlink($filename);
-}
+            $f = "dls/" . md5($link) . "." . ext2($filename);
+            if (
+                in_array(ext2($filename), ["jpg", "jpeg", "webp", "gif", "png"])
+            ) {
+                $f =
+                    "dls/" .
+                    ext2($filename) .
+                    "/" .
+                    md5($link) .
+                    "." .
+                    ext2($filename);
+                @mkdir(dirname($f), 0777, true);
+                rename($filename, $f);
+                // Recursively download links
+            } else {
+                unlink($filename);
+            }
             $_SESSION[$link] = $link;
         }
+
         if (!isset($_SESSION[$link])) {
             downloadRecursive($link, $depth + 1);
             $_SESSION[$link] = $link;
