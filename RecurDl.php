@@ -131,6 +131,8 @@ $_SESSION[$link]=$link;
             $link = rtrim($url, "/") . "/" . ltrim(rtrim($link,'/'), "/");
         }
 
+
+if (!isset($_SESSION[$link])) {
         // Get the filename from the URL
         $filename = "dls/" . md5($link) . "." . ext($link);
 echo "\n$link\n";
@@ -146,7 +148,10 @@ if(in_array(ext2($filename),array('jpg','jpeg','webp','gif','png'))){
         // Recursively download links
 }
 else
-{unlink($filename);}
+{unlink($filename);
+}
+            $_SESSION[$link] = $link;
+        }
         if (!isset($_SESSION[$link])) {
             downloadRecursive($link, $depth + 1);
             $_SESSION[$link] = $link;
