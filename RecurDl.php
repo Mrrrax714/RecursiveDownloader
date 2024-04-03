@@ -1,23 +1,24 @@
 <?php
 
-function ext2($f) {
-$mime=mime_content_type($f);
-    $mimeTypes = array(
-        'image/jpeg' => 'jpg',
- 'text/html' => 'html',
-        'image/png' => 'png',
-        'image/gif' => 'gif',
-        'image/bmp' => 'bmp',
-        'image/webp' => 'webp',
-        'application/pdf' => 'pdf',
+function ext2($f)
+{
+    $mime = mime_content_type($f);
+    $mimeTypes = [
+        "image/jpeg" => "jpg",
+        "text/html" => "html",
+        "image/png" => "png",
+        "image/gif" => "gif",
+        "image/bmp" => "bmp",
+        "image/webp" => "webp",
+        "application/pdf" => "pdf",
         // Add more MIME types and extensions as needed
-    );
+    ];
 
     // Check if the MIME type exists in the mapping
     if (array_key_exists($mime, $mimeTypes)) {
         return $mimeTypes[$mime];
     } else {
-        return 'txt'; // Return null if the MIME type is not found
+        return "txt"; // Return null if the MIME type is not found
     }
 }
 /*
@@ -31,8 +32,8 @@ echo "Extension for MIME type $mime is: $extension";
 $url = "https://example.com/path/to/file/document.pdf";*/
 function ext($url)
 {
-$path_parts["extension"]='txt';
-echo "$url\n";
+    $path_parts["extension"] = "txt";
+    echo "$url\n";
     // Parse the URL
     $path_parts = pathinfo(parse_url($url, PHP_URL_PATH));
 
@@ -92,48 +93,58 @@ function downloadRecursive($url, $depth = 0)
         if (strpos($link, "http") !== 0) {
             $link = rtrim($url, "/") . "/" . ltrim($link, "/");
         }
-    
-    // Get the filename from the URL
-    $filename = "dls/" . basename($link);
-    $filename = "dls/" . md5($link) . "." . ext($link);
-    // Download the file
-    file_put_contents($filename, get($link));
+        echo "\n$link\n";
+        // Get the filename from the URL
+        $filename = "dls/" . basename($link);
+        $filename = "dls/" . md5($link);
 
-$f = "dls/" . md5($link) . "." . ext2($filename);
-rename($filename,$f);
-    // Recursively download links
-if(!isset($_SESSION[$link])){
-    downloadRecursive($link, $depth + 1);
-$_SESSION[$link]=$link;}
-}
+        $link = str_replace(["*", ".asp"], ["/", ""], $link);
+        // Download the file
+        file_put_contents($filename, get($link));
 
-// Extract links from the content
-preg_match_all('/<a\s+href=["\']([^"\']+)["\']/i', $content, $matches);
-$links = $matches[1];
-
-// Download each linked URL recursively
-foreach ($links as $link) {
-    // Construct absolute URL if necessary
-    if (strpos($link, "http") !== 0) {
-        $link = rtrim($url, "/") . "/" . ltrim($link, "/");
+        $f =
+            "dls/" . ext2($filename) . "/" . md5($link) . "." . ext2($filename);
+        @mkdir(dirname($f), 0777, true);
+        rename($filename, $f);
+        // Recursively download links
+        if (!isset($_SESSION[$link])) {
+            downloadRecursive($link, $depth + 1);
+            $_SESSION[$link] = $link;
+        }
     }
 
-    // Get the filename from the URL
-    $filename = "dls/" . md5($link) . "." . ext($link);
+    // Extract links from the content
+    preg_match_all('/<a\s+href=["\']([^"\']+)["\']/i', $content, $matches);
+    $links = $matches[1];
 
-    // Download the file
-    file_put_contents($filename, get($link));
+    // Download each linked URL recursively
+    foreach ($links as $link) {
+        // Construct absolute URL if necessary
+        if (strpos($link, "http") !== 0) {
+            $link = rtrim($url, "/") . "/" . ltrim($link, "/");
+        }
 
-$f = "dls/" . md5($link) . "." . ext2($filename);
-rename($filename,$f);
-    // Recursively download links
+        // Get the filename from the URL
+        $filename = "dls/" . md5($link) . "." . ext($link);
+echo "\n$link\n";
+        // Download the file
+        file_put_contents($filename, get($link));
 
-if(!isset($_SESSION[$link])){
-    downloadRecursive($link, $depth + 1);
-$_SESSION[$link]=$link;}
-}}
+        $f = "dls/" . md5($link) . "." . ext2($filename);
+
+        $f =
+            "dls/" . ext2($filename) . "/" . md5($link) . "." . ext2($filename);
+        @mkdir(dirname($f), 0777, true);
+        rename($filename, $f);
+        // Recursively download links
+
+        if (!isset($_SESSION[$link])) {
+            downloadRecursive($link, $depth + 1);
+            $_SESSION[$link] = $link;
+        }
+    }
+}
 
 // Start downloading from a given URL
-$startUrl =
-    "http://example.com";
+$startUrl="https://example.com/";
 downloadRecursive($startUrl);
