@@ -1,5 +1,6 @@
 <?php
-
+require_once 'vendor/autoload.php';
+$faker = Faker\Factory::create();
 function ext2($f)
 {
     $mime = mime_content_type($f);
@@ -48,6 +49,7 @@ function ext($url)
 $url = "https://example.com";
 function get($url)
 {
+global $faker;
     // Initialize cURL session
     $ch = curl_init();
 
@@ -58,7 +60,7 @@ function get($url)
     // Set SSL related options
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // Verify the peer's SSL certificate
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // Check the existence of a common name and also verify that it matches the hostname provided
-
+curl_setopt($ch, CURLOPT_USERAGENT, $faker->userAgent());
     // Execute the cURL request
     $response = curl_exec($ch);
 
